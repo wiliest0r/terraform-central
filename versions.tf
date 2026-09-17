@@ -5,7 +5,7 @@ terraform {
     organization = "PlayTests"
 
     workspaces {
-      name = "terraform-central"
+      tags = ["beacon-analytics"]
     }
   }
 

@@ -11,21 +11,26 @@ variable "region" {
 }
 
 variable "environment" {
-  description = "Deployment environment (production, staging, development)"
+  description = "Deployment environment (dev, stage, prod)"
   type        = string
-  default     = "production"
+  default     = "dev"
+
+  validation {
+    condition     = contains(["dev", "stage", "prod"], var.environment)
+    error_message = "The environment must be one of: dev, stage, prod."
+  }
 }
 
-variable "artifact_repo_name" {
-  description = "Artifact Registry repository ID for container and WASM OCI images"
+variable "app_version" {
+  description = "Application version string"
   type        = string
-  default     = "beacon-repo"
+  default     = "0.1.0"
 }
 
-variable "service_name" {
-  description = "Cloud Run service name for Beacon server"
+variable "git_sha" {
+  description = "Git commit SHA"
   type        = string
-  default     = "beacon-server"
+  default     = "initial"
 }
 
 variable "beacon_image" {
