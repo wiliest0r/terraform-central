@@ -68,7 +68,12 @@ resource "kubernetes_deployment_v1" "beacon_server" {
 
           port {
             name           = "http"
-            container_port = 80
+            container_port = 8080
+          }
+
+          env {
+            name  = "PORT"
+            value = "8080"
           }
 
           env {
@@ -117,7 +122,7 @@ resource "kubernetes_service_v1" "beacon_service" {
     port {
       name        = "http"
       port        = 80
-      target_port = 80
+      target_port = 8080
     }
 
     type = "LoadBalancer"
