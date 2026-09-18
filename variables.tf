@@ -1,7 +1,7 @@
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
-  default     = "playtests-beacon"
+  default     = "playtests-beacon-dev"
 }
 
 variable "region" {
@@ -36,7 +36,7 @@ variable "beacon_image" {
 variable "enable_gke" {
   description = "Whether to provision GKE cluster and deploy Kubernetes manifests"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "gke_zone" {
@@ -46,7 +46,7 @@ variable "gke_zone" {
 }
 
 variable "gke_machine_type" {
-  description = "Compute Engine machine type for GKE node pool"
+  description = "Compute Engine machine type for GKE node pool (cost-optimized minimal compute)"
   type        = string
-  default     = "e2-medium"
+  default     = "e2-small"
 }

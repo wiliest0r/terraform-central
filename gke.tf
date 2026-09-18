@@ -89,7 +89,7 @@ resource "google_container_cluster" "primary" {
   resource_labels = local.common_labels
 }
 
-# Managed Node Pool with autoscaling and hardened security
+# Managed Node Pool with minimal cost (SPOT instances + 20GB pd-standard disk)
 resource "google_container_node_pool" "primary_nodes" {
   count              = var.enable_gke ? 1 : 0
   name               = "beacon-node-pool-${var.environment}"
@@ -109,6 +109,9 @@ resource "google_container_node_pool" "primary_nodes" {
 
   node_config {
     machine_type    = var.gke_machine_type
+    spot            = var.environment == "dev" ? true : false
+    disk_type       = "pd-standard"
+    disk_size_gb    = 20
     service_account = google_service_account.gke_node_sa[0].email
     oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"]
 
