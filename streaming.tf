@@ -30,9 +30,9 @@ resource "google_storage_bucket" "lakehouse" {
 }
 
 # Grant GCP Pub/Sub Service Agent permission to write files to Lakehouse bucket
-resource "google_storage_bucket_iam_member" "pubsub_gcs_writer" {
+resource "google_storage_bucket_iam_member" "pubsub_gcs_admin" {
   bucket = google_storage_bucket.lakehouse.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.admin"
   member = "serviceAccount:service-${data.google_project.current.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }
 
@@ -76,6 +76,6 @@ resource "google_pubsub_subscription" "lakehouse_sink" {
   labels = local.common_labels
 
   depends_on = [
-    google_storage_bucket_iam_member.pubsub_gcs_writer
+    google_storage_bucket_iam_member.pubsub_gcs_admin
   ]
 }
