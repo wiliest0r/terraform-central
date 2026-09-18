@@ -68,9 +68,9 @@ resource "google_pubsub_subscription" "lakehouse_sink" {
 
   cloud_storage_config {
     bucket          = google_storage_bucket.lakehouse.name
-    filename_prefix = "events/year=%Y/month=%m/day=%d/hour=%H/"
+    filename_prefix = "events/"
     filename_suffix = ".json"
-    max_duration    = "300s"
+    max_duration    = "60s"
     max_bytes       = 10485760 # 10MB micro-batches
   }
 
