@@ -53,3 +53,9 @@ variable "gke_spot_nodes" {
   type        = bool
   default     = false
 }
+
+variable "alert_email" {
+  description = "Email address for Google Cloud Monitoring alert incident notifications"
+  type        = string
+  default     = "alerts@playtests.io"
+}
