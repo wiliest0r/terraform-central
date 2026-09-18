@@ -1,13 +1,11 @@
 variable "project_id" {
-  description = "GCP Project ID"
+  description = "Target GCP Project ID (injected from workspace variable)"
   type        = string
-  default     = "playtests-beacon-dev"
 }
 
 variable "region" {
-  description = "GCP Region for cloud resources"
+  description = "Target GCP Region for cloud resources"
   type        = string
-  default     = "europe-west1"
 }
 
 variable "environment" {
@@ -40,13 +38,18 @@ variable "enable_gke" {
 }
 
 variable "gke_zone" {
-  description = "Zonal location for single-zone GKE cluster (Free Tier eligible)"
+  description = "Zonal location for GKE cluster"
   type        = string
-  default     = "europe-west1-b"
 }
 
 variable "gke_machine_type" {
-  description = "Compute Engine machine type for GKE node pool (cost-optimized minimal compute)"
+  description = "Compute Engine machine type for GKE node pool"
   type        = string
-  default     = "e2-small"
+  default     = "e2-medium"
+}
+
+variable "gke_spot_nodes" {
+  description = "Enable Spot VMs for GKE worker nodes (cost optimization for dev/test; false for production high availability)"
+  type        = bool
+  default     = false
 }
