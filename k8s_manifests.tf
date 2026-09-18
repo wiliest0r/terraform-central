@@ -64,6 +64,9 @@ resource "kubernetes_config_map_v1" "vector_config" {
       include = ["/var/log/beacon/events.log"]
       read_from = "beginning"
 
+      [sources.vector_metrics]
+      type = "internal_metrics"
+
       [transforms.parse_events]
       type = "remap"
       inputs = ["beacon_logs"]
@@ -86,6 +89,11 @@ resource "kubernetes_config_map_v1" "vector_config" {
       type = "disk"
       max_size = 536870912
       when_full = "block"
+
+      [sinks.prometheus]
+      type = "prometheus_exporter"
+      inputs = ["vector_metrics"]
+      address = "0.0.0.0:9090"
     EOT
   }
 
@@ -136,6 +144,11 @@ resource "kubernetes_deployment_v1" "beacon_server" {
       metadata {
         labels = {
           app = "beacon-server"
+        }
+        annotations = {
+          "prometheus.io/scrape" = "true"
+          "prometheus.io/port"   = "9090"
+          "prometheus.io/path"   = "/metrics"
         }
       }
 
@@ -205,6 +218,11 @@ resource "kubernetes_deployment_v1" "beacon_server" {
           image = "timberio/vector:0.43.0-alpine"
 
           args = ["--config", "/etc/vector/vector.toml"]
+
+          port {
+            name           = "metrics"
+            container_port = 9090
+          }
 
           volume_mount {
             name       = "vector-config"
