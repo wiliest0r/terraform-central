@@ -57,6 +57,8 @@ resource "kubernetes_config_map_v1" "vector_config" {
 
   data = {
     "vector.toml" = <<-EOT
+      data_dir = "/var/lib/vector"
+
       [sources.beacon_logs]
       type = "file"
       include = ["/var/log/beacon/events.log"]
@@ -82,7 +84,8 @@ resource "kubernetes_config_map_v1" "vector_config" {
 
       [sinks.pubsub_events.buffer]
       type = "disk"
-      max_size = 268435456
+      max_size = 536870912
+      when_full = "block"
     EOT
   }
 
@@ -223,7 +226,7 @@ resource "kubernetes_deployment_v1" "beacon_server" {
           resources {
             limits = {
               cpu    = "100m"
-              memory = "128Mi"
+              memory = "256Mi"
             }
             requests = {
               cpu    = "20m"
