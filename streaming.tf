@@ -48,10 +48,16 @@ resource "google_pubsub_topic" "beacon_events" {
   labels = local.common_labels
 }
 
-# Grant publisher role to Beacon Runtime Service Account (used by Vector sidecar)
+# Grant publisher & viewer role to Beacon Runtime Service Account (used by Vector sidecar)
 resource "google_pubsub_topic_iam_member" "runtime_publisher" {
   topic  = google_pubsub_topic.beacon_events.name
   role   = "roles/pubsub.publisher"
+  member = "serviceAccount:${google_service_account.beacon_runtime.email}"
+}
+
+resource "google_pubsub_topic_iam_member" "runtime_viewer" {
+  topic  = google_pubsub_topic.beacon_events.name
+  role   = "roles/pubsub.viewer"
   member = "serviceAccount:${google_service_account.beacon_runtime.email}"
 }
 
