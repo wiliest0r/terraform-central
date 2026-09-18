@@ -48,6 +48,14 @@ resource "kubernetes_deployment_v1" "beacon_server" {
   spec {
     replicas = 1
 
+    strategy {
+      type = "RollingUpdate"
+      rolling_update {
+        max_surge       = "0"
+        max_unavailable = "1"
+      }
+    }
+
     selector {
       match_labels = {
         app = "beacon-server"
@@ -101,6 +109,12 @@ resource "kubernetes_deployment_v1" "beacon_server" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [
+      spec[0].template[0].spec[0].container[0].image
+    ]
+  }
+
   depends_on = [google_container_node_pool.primary_nodes]
 }
 
@@ -128,5 +142,5 @@ resource "kubernetes_service_v1" "beacon_service" {
     type = "LoadBalancer"
   }
 
-  depends_on = [kubernetes_deployment_v1.beacon_server]
+  depends_on = [google_container_node_pool.primary_nodes]
 }
