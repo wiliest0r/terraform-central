@@ -1,4 +1,4 @@
-name: Terraform GitOps & Cloud Delivery
+name: Terraform CI & VCS Gates
 
 on:
   push:
@@ -6,19 +6,6 @@ on:
   pull_request:
     branches: [ develop, stage, main ]
   workflow_dispatch:
-    inputs:
-      target_env:
-        description: "Target environment to apply"
-        required: true
-        type: choice
-        options:
-          - dev
-          - stage
-          - prod
-
-permissions:
-  contents: read
-  pull-requests: write
 
 jobs:
   validate:
@@ -32,11 +19,12 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.16.3
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Terraform Format Check
-        run: terraform fmt -check -diff
+        run: terraform fmt -check
 
-      - name: Terraform Init (Static Validation)
+      - name: Terraform Init
         run: terraform init -backend=false
 
       - name: Terraform Validate
@@ -51,7 +39,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Resolve Workspace
+      - name: Select Workspace Target
         id: ws
         run: |
           if [ "${{ github.base_ref }}" == "develop" ]; then
@@ -77,81 +65,3 @@ jobs:
         env:
           TF_WORKSPACE: ${{ steps.ws.outputs.workspace }}
         run: terraform plan -input=false
-
-  apply-dev:
-    name: Deploy to Dev
-    needs: validate
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || (github.event_name == 'workflow_dispatch' && inputs.target_env == 'dev')
-    runs-on: ubuntu-latest
-    environment: dev
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.16.3
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-      - name: Terraform Init
-        env:
-          TF_WORKSPACE: terraform-central-dev
-        run: terraform init -input=false
-
-      - name: Terraform Apply
-        env:
-          TF_WORKSPACE: terraform-central-dev
-        run: terraform apply -input=false -auto-approve
-
-  apply-stage:
-    name: Deploy to Stage
-    needs: validate
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/stage') || (github.event_name == 'workflow_dispatch' && inputs.target_env == 'stage')
-    runs-on: ubuntu-latest
-    environment: stage
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.16.3
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-      - name: Terraform Init
-        env:
-          TF_WORKSPACE: terraform-central-stage
-        run: terraform init -input=false
-
-      - name: Terraform Apply
-        env:
-          TF_WORKSPACE: terraform-central-stage
-        run: terraform apply -input=false -auto-approve
-
-  apply-prod:
-    name: Deploy to Prod
-    needs: validate
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.target_env == 'prod')
-    runs-on: ubuntu-latest
-    environment: prod
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.16.3
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-      - name: Terraform Init
-        env:
-          TF_WORKSPACE: terraform-central-prod
-        run: terraform init -input=false
-
-      - name: Terraform Apply
-        env:
-          TF_WORKSPACE: terraform-central-prod
-        run: terraform apply -input=false -auto-approve
