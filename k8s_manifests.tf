@@ -76,6 +76,7 @@ resource "kubernetes_config_map_v1" "vector_config" {
         abort
       }
       . = parsed
+      .pubsub_ordering_key = to_string(.tenant_id) ?? "default"
       '''
 
       [sinks.pubsub_events]
@@ -83,6 +84,7 @@ resource "kubernetes_config_map_v1" "vector_config" {
       inputs = ["parse_events"]
       project = "${var.project_id}"
       topic = "${google_pubsub_topic.beacon_events.name}"
+      ordering_key_field = "pubsub_ordering_key"
       encoding.codec = "json"
 
       [sinks.pubsub_events.buffer]
