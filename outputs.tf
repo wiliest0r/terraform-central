@@ -13,16 +13,6 @@ output "environment" {
   value       = var.environment
 }
 
-output "cloud_run_service_name" {
-  description = "Name of the provisioned Cloud Run service"
-  value       = google_cloud_run_v2_service.beacon_server.name
-}
-
-output "cloud_run_service_url" {
-  description = "Direct HTTPS URI of the Beacon Cloud Run service"
-  value       = google_cloud_run_v2_service.beacon_server.uri
-}
-
 output "artifact_registry_repository_id" {
   description = "ID of the Artifact Registry repository"
   value       = google_artifact_registry_repository.beacon_repo.repository_id
@@ -34,7 +24,7 @@ output "artifact_registry_repository_url" {
 }
 
 output "runtime_service_account" {
-  description = "Dedicated runtime service account for Cloud Run container"
+  description = "Dedicated runtime service account for Beacon workloads"
   value       = google_service_account.beacon_runtime.email
 }
 
@@ -50,10 +40,21 @@ output "gha_deployer_service_account" {
 
 output "tfc_workload_identity_provider" {
   description = "Workload Identity Provider for HCP Terraform"
-  value       = "projects/847948858817/locations/global/workloadIdentityPools/tfc-pool/providers/tfc-provider"
+  value       = "projects/${var.project_id}/locations/global/workloadIdentityPools/tfc-pool/providers/tfc-provider"
 }
 
-output "github_workload_identity_provider" {
-  description = "Workload Identity Provider for GitHub Actions"
-  value       = "projects/847948858817/locations/global/workloadIdentityPools/tfc-pool/providers/github-provider"
+# GKE Cluster outputs (present when enable_gke is true)
+output "gke_cluster_name" {
+  description = "Name of the GKE cluster"
+  value       = var.enable_gke && length(google_container_cluster.primary) > 0 ? google_container_cluster.primary[0].name : null
+}
+
+output "gke_cluster_endpoint" {
+  description = "Master endpoint of the GKE cluster"
+  value       = var.enable_gke && length(google_container_cluster.primary) > 0 ? google_container_cluster.primary[0].endpoint : null
+}
+
+output "gke_service_load_balancer_ip" {
+  description = "Public Load Balancer IP of the Beacon Kubernetes service"
+  value       = var.enable_gke && length(kubernetes_service_v1.beacon_service) > 0 ? (length(kubernetes_service_v1.beacon_service[0].status[0].load_balancer[0].ingress) > 0 ? kubernetes_service_v1.beacon_service[0].status[0].load_balancer[0].ingress[0].ip : "pending") : null
 }
