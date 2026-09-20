@@ -174,7 +174,7 @@ resource "google_bigquery_table" "view_attribution_first_last_touch" {
       first_touches AS (
         SELECT
           account_id,
-          COALESCE(device_id, visitor_id) AS device_id,
+          device_id,
           utm_source AS first_touch_source,
           utm_medium AS first_touch_medium,
           utm_campaign AS first_touch_campaign
@@ -184,7 +184,7 @@ resource "google_bigquery_table" "view_attribution_first_last_touch" {
       conversions AS (
         SELECT
           account_id,
-          COALESCE(device_id, visitor_id) AS device_id,
+          device_id,
           session_id,
           server_timestamp AS conversion_time,
           utm_source AS last_touch_source,
