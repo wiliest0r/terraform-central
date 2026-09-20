@@ -1,9 +1,15 @@
 [
   {
-    "name": "tenant_id",
+    "name": "account_id",
     "type": "STRING",
     "mode": "REQUIRED",
     "description": "Multi-tenant B2B client or account identifier"
+  },
+  {
+    "name": "tenant_id",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Legacy alias for account_id (kept for backwards compatibility)"
   },
   {
     "name": "app_id",
