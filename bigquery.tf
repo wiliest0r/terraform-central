@@ -144,3 +144,115 @@ resource "google_bigquery_table" "view_adtech_performance" {
 
   depends_on = [google_bigquery_table.events_raw]
 }
+
+# 7. Multi-Touch Attribution & Campaign Performance Marts
+resource "google_bigquery_table" "view_attribution_first_last_touch" {
+  dataset_id          = google_bigquery_dataset.beacon_analytics.dataset_id
+  table_id            = "v_attribution_first_last_touch"
+  deletion_protection = false
+
+  view {
+    query          = <<-SQL
+      WITH ordered_sessions AS (
+        SELECT
+          account_id,
+          visitor_id,
+          session_id,
+          server_timestamp,
+          is_conversion,
+          COALESCE(utm_source, 'direct') AS utm_source,
+          COALESCE(utm_medium, 'none') AS utm_medium,
+          COALESCE(utm_campaign, 'none') AS utm_campaign,
+          COALESCE(
+            SAFE_CAST(JSON_EXTRACT_SCALAR(custom_properties_json, '$.value') AS FLOAT64),
+            0.0
+          ) AS conversion_value,
+          ROW_NUMBER() OVER (PARTITION BY account_id, visitor_id ORDER BY server_timestamp ASC) AS touch_asc,
+          ROW_NUMBER() OVER (PARTITION BY account_id, visitor_id ORDER BY server_timestamp DESC) AS touch_desc
+        FROM `${var.project_id}.${google_bigquery_dataset.beacon_analytics.dataset_id}.events_raw`
+      ),
+      first_touches AS (
+        SELECT
+          account_id,
+          visitor_id,
+          utm_source AS first_touch_source,
+          utm_medium AS first_touch_medium,
+          utm_campaign AS first_touch_campaign
+        FROM ordered_sessions
+        WHERE touch_asc = 1
+      ),
+      conversions AS (
+        SELECT
+          account_id,
+          visitor_id,
+          session_id,
+          server_timestamp AS conversion_time,
+          utm_source AS last_touch_source,
+          utm_medium AS last_touch_medium,
+          utm_campaign AS last_touch_campaign,
+          conversion_value
+        FROM ordered_sessions
+        WHERE is_conversion = true
+      )
+      SELECT
+        c.account_id,
+        DATE(c.conversion_time) AS conversion_date,
+        f.first_touch_source,
+        f.first_touch_campaign,
+        c.last_touch_source,
+        c.last_touch_campaign,
+        COUNT(1) AS total_conversions,
+        SUM(c.conversion_value) AS total_revenue
+      FROM conversions c
+      LEFT JOIN first_touches f
+        ON c.account_id = f.account_id AND c.visitor_id = f.visitor_id
+      GROUP BY 1, 2, 3, 4, 5, 6
+    SQL
+    use_legacy_sql = false
+  }
+
+  labels = local.common_labels
+
+  depends_on = [google_bigquery_table.events_raw]
+}
+
+resource "google_bigquery_table" "view_campaign_unit_economics" {
+  dataset_id          = google_bigquery_dataset.beacon_analytics.dataset_id
+  table_id            = "v_campaign_unit_economics"
+  deletion_protection = false
+
+  view {
+    query          = <<-SQL
+      SELECT
+        DATE(server_timestamp) AS report_date,
+        account_id,
+        COALESCE(utm_source, 'direct') AS channel_source,
+        COALESCE(utm_campaign, 'none') AS campaign_name,
+        COUNT(DISTINCT session_id) AS total_visits,
+        COUNT(DISTINCT visitor_id) AS unique_visitors,
+        COUNTIF(is_conversion = true) AS conversions,
+        ROUND(
+          SAFE_DIVIDE(COUNTIF(is_conversion = true) * 100.0, COUNT(DISTINCT session_id)),
+          2
+        ) AS conversion_rate_percent,
+        ROUND(
+          SUM(COALESCE(SAFE_CAST(JSON_EXTRACT_SCALAR(custom_properties_json, '$.value') AS FLOAT64), 0.0)),
+          2
+        ) AS gross_revenue,
+        ROUND(
+          SAFE_DIVIDE(
+            SUM(COALESCE(SAFE_CAST(JSON_EXTRACT_SCALAR(custom_properties_json, '$.value') AS FLOAT64), 0.0)),
+            NULLIF(COUNTIF(is_conversion = true), 0)
+          ),
+          2
+        ) AS average_order_value
+      FROM `${var.project_id}.${google_bigquery_dataset.beacon_analytics.dataset_id}.events_raw`
+      GROUP BY 1, 2, 3, 4
+    SQL
+    use_legacy_sql = false
+  }
+
+  labels = local.common_labels
+
+  depends_on = [google_bigquery_table.events_raw]
+}
