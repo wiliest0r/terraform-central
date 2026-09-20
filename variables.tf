@@ -6,6 +6,7 @@ variable "project_id" {
 variable "region" {
   description = "Target GCP Region for cloud resources"
   type        = string
+  default     = "europe-west1"
 }
 
 variable "environment" {
@@ -40,6 +41,7 @@ variable "enable_gke" {
 variable "gke_zone" {
   description = "Zonal location for GKE cluster"
   type        = string
+  default     = "europe-west1-b"
 }
 
 variable "gke_machine_type" {
