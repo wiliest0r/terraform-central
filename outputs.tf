@@ -69,3 +69,19 @@ output "gcs_lakehouse_bucket" {
   description = "GCS Lakehouse Bucket for Parquet/Avro Databricks & Spark ingestion"
   value       = google_storage_bucket.lakehouse.url
 }
+
+# BigQuery Analytics outputs (Stage 5)
+output "bigquery_dataset_id" {
+  description = "BigQuery Dataset ID for Beacon Analytics"
+  value       = google_bigquery_dataset.beacon_analytics.dataset_id
+}
+
+output "bigquery_table_events_raw" {
+  description = "BigQuery Ingestion Table ID for raw events"
+  value       = google_bigquery_table.events_raw.table_id
+}
+
+output "bigquery_table_events_lakehouse" {
+  description = "BigQuery External BigLake Table ID over GCS"
+  value       = google_bigquery_table.events_lakehouse.table_id
+}

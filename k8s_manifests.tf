@@ -76,6 +76,7 @@ resource "kubernetes_config_map_v1" "vector_config" {
         abort
       }
       . = parsed
+      .pubsub_ordering_key = to_string(.account_id) ?? to_string(.tenant_id) ?? "default"
       '''
 
       [sinks.pubsub_events]
@@ -83,6 +84,7 @@ resource "kubernetes_config_map_v1" "vector_config" {
       inputs = ["parse_events"]
       project = "${var.project_id}"
       topic = "${google_pubsub_topic.beacon_events.name}"
+      ordering_key_field = "pubsub_ordering_key"
       encoding.codec = "json"
 
       [sinks.pubsub_events.buffer]
@@ -211,6 +213,13 @@ resource "kubernetes_deployment_v1" "beacon_server" {
               memory = "64Mi"
             }
           }
+
+          security_context {
+            allow_privilege_escalation = false
+            capabilities {
+              drop = ["ALL"]
+            }
+          }
         }
 
         container {
@@ -251,6 +260,13 @@ resource "kubernetes_deployment_v1" "beacon_server" {
               memory = "32Mi"
             }
           }
+
+          security_context {
+            allow_privilege_escalation = false
+            capabilities {
+              drop = ["ALL"]
+            }
+          }
         }
       }
     }
@@ -258,7 +274,8 @@ resource "kubernetes_deployment_v1" "beacon_server" {
 
   lifecycle {
     ignore_changes = [
-      spec[0].template[0].spec[0].container[0].image
+      spec[0].template[0].spec[0].container[0].image,
+      spec[0].replicas
     ]
   }
 
@@ -291,4 +308,83 @@ resource "kubernetes_service_v1" "beacon_service" {
   }
 
   depends_on = [google_container_node_pool.primary_nodes]
+}
+
+
+# Horizontal Pod Autoscaler (HPA v2) for Dynamic Autoscaling (1 to 5+ replicas)
+resource "kubernetes_horizontal_pod_autoscaler_v2" "beacon_hpa" {
+  count = var.enable_gke ? 1 : 0
+
+  metadata {
+    name      = "beacon-hpa"
+    namespace = kubernetes_namespace_v1.beacon[0].metadata[0].name
+    labels    = local.common_labels
+  }
+
+  spec {
+    scale_target_ref {
+      api_version = "apps/v1"
+      kind        = "Deployment"
+      name        = kubernetes_deployment_v1.beacon_server[0].metadata[0].name
+    }
+
+    min_replicas = 1
+    max_replicas = 5
+
+    metric {
+      type = "Resource"
+      resource {
+        name = "cpu"
+        target {
+          type                = "Utilization"
+          average_utilization = 70
+        }
+      }
+    }
+
+    metric {
+      type = "Resource"
+      resource {
+        name = "memory"
+        target {
+          type                = "Utilization"
+          average_utilization = 80
+        }
+      }
+    }
+
+    behavior {
+      scale_up {
+        stabilization_window_seconds = 0
+        select_policy                = "Max"
+        policy {
+          period_seconds = 15
+          type           = "Percent"
+          value          = 100
+        }
+        policy {
+          period_seconds = 15
+          type           = "Pods"
+          value          = 2
+        }
+      }
+
+      scale_down {
+        stabilization_window_seconds = 300
+        select_policy                = "Min"
+        policy {
+          period_seconds = 60
+          type           = "Percent"
+          value          = 50
+        }
+        policy {
+          period_seconds = 60
+          type           = "Pods"
+          value          = 1
+        }
+      }
+    }
+  }
+
+  depends_on = [kubernetes_deployment_v1.beacon_server]
 }

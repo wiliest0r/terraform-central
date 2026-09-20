@@ -1,4 +1,4 @@
-name: Terraform CI & VCS Gates
+﻿name: Terraform CI & VCS Gates
 
 on:
   push:
@@ -10,13 +10,13 @@ on:
 jobs:
   validate:
     name: Terraform Format & Validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.16.3
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
@@ -34,10 +34,10 @@ jobs:
     name: HCP Speculative Plan
     needs: validate
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Select Workspace Target
         id: ws
@@ -51,7 +51,7 @@ jobs:
           fi
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.16.3
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
