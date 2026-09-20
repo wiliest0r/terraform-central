@@ -76,7 +76,7 @@ resource "kubernetes_config_map_v1" "vector_config" {
         abort
       }
       . = parsed
-      .pubsub_ordering_key = to_string(.tenant_id) ?? "default"
+      .pubsub_ordering_key = to_string(.account_id) ?? to_string(.tenant_id) ?? "default"
       '''
 
       [sinks.pubsub_events]

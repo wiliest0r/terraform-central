@@ -24,7 +24,7 @@ resource "google_bigquery_table" "events_raw" {
     field = "server_timestamp"
   }
 
-  clustering = ["tenant_id", "event_name", "session_id"]
+  clustering = ["account_id", "event_name", "session_id"]
 
   schema = file("${path.module}/schemas/events_schema.json")
   labels = local.common_labels
@@ -99,14 +99,15 @@ resource "google_bigquery_table" "view_daily_active_users" {
     query          = <<-SQL
       SELECT
         DATE(server_timestamp) AS event_date,
-        tenant_id,
+        account_id,
+        COALESCE(tenant_id, account_id) AS tenant_id,
         COUNT(DISTINCT visitor_id) AS unique_visitors,
         COUNT(DISTINCT session_id) AS unique_sessions,
         COUNT(1) AS total_events,
         COUNTIF(is_conversion = true) AS total_conversions,
         COUNTIF(has_ad_attribution = true) AS attributed_events
       FROM `${var.project_id}.${google_bigquery_dataset.beacon_analytics.dataset_id}.events_raw`
-      GROUP BY 1, 2
+      GROUP BY 1, 2, 3
     SQL
     use_legacy_sql = false
   }
@@ -125,7 +126,8 @@ resource "google_bigquery_table" "view_adtech_performance" {
     query          = <<-SQL
       SELECT
         DATE(server_timestamp) AS event_date,
-        tenant_id,
+        account_id,
+        COALESCE(tenant_id, account_id) AS tenant_id,
         COALESCE(utm_source, 'direct') AS utm_source,
         COALESCE(utm_campaign, 'none') AS utm_campaign,
         COUNT(1) AS total_events,
@@ -133,7 +135,7 @@ resource "google_bigquery_table" "view_adtech_performance" {
         COUNTIF(fbclid IS NOT NULL) AS fbclid_events,
         COUNTIF(is_conversion = true) AS conversions
       FROM `${var.project_id}.${google_bigquery_dataset.beacon_analytics.dataset_id}.events_raw`
-      GROUP BY 1, 2, 3, 4
+      GROUP BY 1, 2, 3, 4, 5
     SQL
     use_legacy_sql = false
   }
