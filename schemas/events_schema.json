@@ -1,266 +1,278 @@
 [
-  {
-    "name": "account_id",
-    "type": "STRING",
-    "mode": "REQUIRED",
-    "description": "Multi-tenant B2B client or account identifier"
-  },
-  {
-    "name": "tenant_id",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Legacy alias for account_id (kept for backwards compatibility)"
-  },
-  {
-    "name": "app_id",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Application or website identifier"
-  },
-  {
-    "name": "event_id",
-    "type": "STRING",
-    "mode": "REQUIRED",
-    "description": "Unique event UUID"
-  },
-  {
-    "name": "event_name",
-    "type": "STRING",
-    "mode": "REQUIRED",
-    "description": "Name of the tracked event"
-  },
-  {
-    "name": "client_timestamp",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "ISO-8601 timestamp generated at client runtime"
-  },
-  {
-    "name": "server_timestamp",
-    "type": "TIMESTAMP",
-    "mode": "REQUIRED",
-    "description": "UTC timestamp when event was ingested by Beacon edge server"
-  },
-  {
-    "name": "is_quarantined",
-    "type": "BOOLEAN",
-    "mode": "REQUIRED",
-    "description": "True if event failed domain or token verification"
-  },
-  {
-    "name": "quarantine_reason",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Detailed failure reason if quarantined"
-  },
-  {
-    "name": "visitor_id",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Persistent anonymous end-user identifier"
-  },
-  {
-    "name": "anonymous_id",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Alias for visitor_id"
-  },
-  {
-    "name": "session_id",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Unique session identifier"
-  },
-  {
-    "name": "user_id",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Authenticated user ID within customer system"
-  },
-  {
-    "name": "hashed_email",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "SHA-256 normalized hash of user email for Google Enhanced Conversions / Meta CAPI"
-  },
-  {
-    "name": "hashed_phone",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "SHA-256 normalized hash of user phone number"
-  },
-  {
-    "name": "crm_lead_id",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Linked Salesforce or CRM lead/contact identifier"
-  },
-  {
-    "name": "has_ad_attribution",
-    "type": "BOOLEAN",
-    "mode": "NULLABLE",
-    "description": "Flag indicating presence of AdTech click IDs (gclid, fbclid, etc.)"
-  },
-  {
-    "name": "is_conversion",
-    "type": "BOOLEAN",
-    "mode": "NULLABLE",
-    "description": "Flag indicating target conversion event (purchase, lead, signup)"
-  },
-  {
-    "name": "gclid",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Google Ads Click Identifier"
-  },
-  {
-    "name": "fbclid",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Meta / Facebook Click Identifier"
-  },
-  {
-    "name": "gbraid",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Google Ads iOS App-to-Web click identifier"
-  },
-  {
-    "name": "wbraid",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Google Ads iOS Web-to-App click identifier"
-  },
-  {
-    "name": "msclkid",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Microsoft Advertising Click Identifier"
-  },
-  {
-    "name": "ttclid",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "TikTok Ads Click Identifier"
-  },
-  {
-    "name": "utm_source",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Marketing UTM Source"
-  },
-  {
-    "name": "utm_medium",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Marketing UTM Medium"
-  },
-  {
-    "name": "utm_campaign",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Marketing UTM Campaign"
-  },
-  {
-    "name": "utm_term",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Marketing UTM Term"
-  },
-  {
-    "name": "utm_content",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Marketing UTM Content"
-  },
-  {
-    "name": "page_url",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Full URL where the event occurred"
-  },
-  {
-    "name": "page_path",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Path component of the URL"
-  },
-  {
-    "name": "page_title",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Webpage document title"
-  },
-  {
-    "name": "page_referrer",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Referrer URL"
-  },
-  {
-    "name": "screen_width",
-    "type": "INTEGER",
-    "mode": "NULLABLE",
-    "description": "Client screen width in pixels"
-  },
-  {
-    "name": "screen_height",
-    "type": "INTEGER",
-    "mode": "NULLABLE",
-    "description": "Client screen height in pixels"
-  },
-  {
-    "name": "locale",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Client browser language locale"
-  },
-  {
-    "name": "timezone",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Client timezone string"
-  },
-  {
-    "name": "client_ip",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Client network IP (from x-forwarded-for)"
-  },
-  {
-    "name": "user_agent",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Client User-Agent header"
-  },
-  {
-    "name": "custom_properties_json",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Serialized dynamic custom event properties JSON"
-  },
-  {
-    "name": "subscription_name",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Pub/Sub subscription metadata"
-  },
-  {
-    "name": "message_id",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Pub/Sub message ID metadata"
-  },
-  {
-    "name": "publish_time",
-    "type": "TIMESTAMP",
-    "mode": "NULLABLE",
-    "description": "Pub/Sub publish timestamp metadata"
-  },
-  {
-    "name": "attributes",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Pub/Sub attributes JSON metadata"
-  }
+    {
+        "name":  "account_id",
+        "type":  "STRING",
+        "mode":  "REQUIRED",
+        "description":  "Multi-tenant B2B client or account identifier"
+    },
+    {
+        "name":  "tenant_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Legacy alias for account_id (kept for backwards compatibility)"
+    },
+    {
+        "name":  "app_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Application or website identifier"
+    },
+    {
+        "name":  "event_id",
+        "type":  "STRING",
+        "mode":  "REQUIRED",
+        "description":  "Unique event UUID"
+    },
+    {
+        "name":  "event_name",
+        "type":  "STRING",
+        "mode":  "REQUIRED",
+        "description":  "Name of the tracked event"
+    },
+    {
+        "name":  "client_timestamp",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "ISO-8601 timestamp generated at client runtime"
+    },
+    {
+        "name":  "server_timestamp",
+        "type":  "TIMESTAMP",
+        "mode":  "REQUIRED",
+        "description":  "UTC timestamp when event was ingested by Beacon edge server"
+    },
+    {
+        "name":  "is_quarantined",
+        "type":  "BOOLEAN",
+        "mode":  "REQUIRED",
+        "description":  "True if event failed domain or token verification"
+    },
+    {
+        "name":  "quarantine_reason",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Detailed failure reason if quarantined"
+    },
+    {
+        "name":  "visitor_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Persistent anonymous end-user identifier"
+    },
+    {
+        "name":  "anonymous_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Alias for visitor_id"
+    },
+    {
+        "name":  "session_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Unique session identifier"
+    },
+    {
+        "name":  "user_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Authenticated user ID within customer system"
+    },
+    {
+        "name":  "hashed_email",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "SHA-256 normalized hash of user email for Google Enhanced Conversions / Meta CAPI"
+    },
+    {
+        "name":  "hashed_phone",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "SHA-256 normalized hash of user phone number"
+    },
+    {
+        "name":  "crm_lead_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Linked Salesforce or CRM lead/contact identifier"
+    },
+    {
+        "name":  "has_ad_attribution",
+        "type":  "BOOLEAN",
+        "mode":  "NULLABLE",
+        "description":  "Flag indicating presence of AdTech click IDs (gclid, fbclid, etc.)"
+    },
+    {
+        "name":  "is_conversion",
+        "type":  "BOOLEAN",
+        "mode":  "NULLABLE",
+        "description":  "Flag indicating target conversion event (purchase, lead, signup)"
+    },
+    {
+        "name":  "gclid",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Google Ads Click Identifier"
+    },
+    {
+        "name":  "fbclid",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Meta / Facebook Click Identifier"
+    },
+    {
+        "name":  "gbraid",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Google Ads iOS App-to-Web click identifier"
+    },
+    {
+        "name":  "wbraid",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Google Ads iOS Web-to-App click identifier"
+    },
+    {
+        "name":  "msclkid",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Microsoft Advertising Click Identifier"
+    },
+    {
+        "name":  "ttclid",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "TikTok Ads Click Identifier"
+    },
+    {
+        "name":  "utm_source",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Marketing UTM Source"
+    },
+    {
+        "name":  "utm_medium",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Marketing UTM Medium"
+    },
+    {
+        "name":  "utm_campaign",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Marketing UTM Campaign"
+    },
+    {
+        "name":  "utm_term",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Marketing UTM Term"
+    },
+    {
+        "name":  "utm_content",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Marketing UTM Content"
+    },
+    {
+        "name":  "page_url",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Full URL where the event occurred"
+    },
+    {
+        "name":  "page_path",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Path component of the URL"
+    },
+    {
+        "name":  "page_title",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Webpage document title"
+    },
+    {
+        "name":  "page_referrer",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Referrer URL"
+    },
+    {
+        "name":  "screen_width",
+        "type":  "INTEGER",
+        "mode":  "NULLABLE",
+        "description":  "Client screen width in pixels"
+    },
+    {
+        "name":  "screen_height",
+        "type":  "INTEGER",
+        "mode":  "NULLABLE",
+        "description":  "Client screen height in pixels"
+    },
+    {
+        "name":  "locale",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Client browser language locale"
+    },
+    {
+        "name":  "timezone",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Client timezone string"
+    },
+    {
+        "name":  "client_ip",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Client network IP (from x-forwarded-for)"
+    },
+    {
+        "name":  "user_agent",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Client User-Agent header"
+    },
+    {
+        "name":  "custom_properties_json",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Serialized dynamic custom event properties JSON"
+    },
+    {
+        "name":  "subscription_name",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Pub/Sub subscription metadata"
+    },
+    {
+        "name":  "message_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Pub/Sub message ID metadata"
+    },
+    {
+        "name":  "publish_time",
+        "type":  "TIMESTAMP",
+        "mode":  "NULLABLE",
+        "description":  "Pub/Sub publish timestamp metadata"
+    },
+    {
+        "name":  "attributes",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Pub/Sub attributes JSON metadata"
+    },
+    {
+        "name":  "device_id",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Persistent physical client device or browser identifier"
+    },
+    {
+        "name":  "device_fp",
+        "type":  "STRING",
+        "mode":  "NULLABLE",
+        "description":  "Hardware/canvas/screen fingerprint hash for cross-session identity resolution"
+    }
 ]

@@ -101,7 +101,7 @@ resource "google_bigquery_table" "view_daily_active_users" {
         DATE(server_timestamp) AS event_date,
         account_id,
         COALESCE(tenant_id, account_id) AS tenant_id,
-        COUNT(DISTINCT visitor_id) AS unique_visitors,
+        COUNT(DISTINCT COALESCE(device_id, visitor_id)) AS active_devices,
         COUNT(DISTINCT session_id) AS unique_sessions,
         COUNT(1) AS total_events,
         COUNTIF(is_conversion = true) AS total_conversions,
@@ -156,7 +156,7 @@ resource "google_bigquery_table" "view_attribution_first_last_touch" {
       WITH ordered_sessions AS (
         SELECT
           account_id,
-          visitor_id,
+          COALESCE(device_id, visitor_id) AS device_id,
           session_id,
           server_timestamp,
           is_conversion,
@@ -167,14 +167,14 @@ resource "google_bigquery_table" "view_attribution_first_last_touch" {
             SAFE_CAST(JSON_EXTRACT_SCALAR(custom_properties_json, '$.value') AS FLOAT64),
             0.0
           ) AS conversion_value,
-          ROW_NUMBER() OVER (PARTITION BY account_id, visitor_id ORDER BY server_timestamp ASC) AS touch_asc,
-          ROW_NUMBER() OVER (PARTITION BY account_id, visitor_id ORDER BY server_timestamp DESC) AS touch_desc
+          ROW_NUMBER() OVER (PARTITION BY account_id, COALESCE(device_id, visitor_id) ORDER BY server_timestamp ASC) AS touch_asc,
+          ROW_NUMBER() OVER (PARTITION BY account_id, COALESCE(device_id, visitor_id) ORDER BY server_timestamp DESC) AS touch_desc
         FROM `${var.project_id}.${google_bigquery_dataset.beacon_analytics.dataset_id}.events_raw`
       ),
       first_touches AS (
         SELECT
           account_id,
-          visitor_id,
+          COALESCE(device_id, visitor_id) AS device_id,
           utm_source AS first_touch_source,
           utm_medium AS first_touch_medium,
           utm_campaign AS first_touch_campaign
@@ -184,7 +184,7 @@ resource "google_bigquery_table" "view_attribution_first_last_touch" {
       conversions AS (
         SELECT
           account_id,
-          visitor_id,
+          COALESCE(device_id, visitor_id) AS device_id,
           session_id,
           server_timestamp AS conversion_time,
           utm_source AS last_touch_source,
@@ -205,7 +205,7 @@ resource "google_bigquery_table" "view_attribution_first_last_touch" {
         SUM(c.conversion_value) AS total_revenue
       FROM conversions c
       LEFT JOIN first_touches f
-        ON c.account_id = f.account_id AND c.visitor_id = f.visitor_id
+        ON c.account_id = f.account_id AND c.device_id = f.device_id
       GROUP BY 1, 2, 3, 4, 5, 6
     SQL
     use_legacy_sql = false
@@ -229,7 +229,7 @@ resource "google_bigquery_table" "view_campaign_unit_economics" {
         COALESCE(utm_source, 'direct') AS channel_source,
         COALESCE(utm_campaign, 'none') AS campaign_name,
         COUNT(DISTINCT session_id) AS total_visits,
-        COUNT(DISTINCT visitor_id) AS unique_visitors,
+        COUNT(DISTINCT COALESCE(device_id, visitor_id)) AS unique_devices,
         COUNTIF(is_conversion = true) AS conversions,
         ROUND(
           SAFE_DIVIDE(COUNTIF(is_conversion = true) * 100.0, COUNT(DISTINCT session_id)),
