@@ -213,6 +213,13 @@ resource "kubernetes_deployment_v1" "beacon_server" {
               memory = "64Mi"
             }
           }
+
+          security_context {
+            allow_privilege_escalation = false
+            capabilities {
+              drop = ["ALL"]
+            }
+          }
         }
 
         container {
@@ -251,6 +258,13 @@ resource "kubernetes_deployment_v1" "beacon_server" {
             requests = {
               cpu    = "20m"
               memory = "32Mi"
+            }
+          }
+
+          security_context {
+            allow_privilege_escalation = false
+            capabilities {
+              drop = ["ALL"]
             }
           }
         }
