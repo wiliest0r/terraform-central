@@ -1,0 +1,67 @@
+﻿name: Terraform CI & VCS Gates
+
+on:
+  push:
+    branches: [ develop, stage, main ]
+  pull_request:
+    branches: [ develop, stage, main ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Terraform Format & Validate
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.16.3
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  speculative-plan:
+    name: HCP Speculative Plan
+    needs: validate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Select Workspace Target
+        id: ws
+        run: |
+          if [ "${{ github.base_ref }}" == "develop" ]; then
+            echo "workspace=terraform-central-dev" >> $GITHUB_OUTPUT
+          elif [ "${{ github.base_ref }}" == "stage" ]; then
+            echo "workspace=terraform-central-stage" >> $GITHUB_OUTPUT
+          elif [ "${{ github.base_ref }}" == "main" ]; then
+            echo "workspace=terraform-central-prod" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.16.3
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        env:
+          TF_WORKSPACE: ${{ steps.ws.outputs.workspace }}
+        run: terraform init -input=false
+
+      - name: Terraform Speculative Plan
+        env:
+          TF_WORKSPACE: ${{ steps.ws.outputs.workspace }}
+        run: terraform plan -input=false
